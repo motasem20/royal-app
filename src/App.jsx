@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import coin from './assets/coin.png';
-import cover from './assets/cover.png';
+import cover from './assets/COVER.png';
+
+const API_URL = "https://royal-mining-backend.onrender.com";
+const userId = "demo_user";
 
 export default function App() {
   const [started, setStarted] = useState(false);
@@ -16,12 +19,18 @@ export default function App() {
   const [walletConnected, setWalletConnected] = useState(false);
 
   useEffect(() => {
+    handleLoadFromServer();
+  }, []);
+
+  useEffect(() => {
+    handleSaveToServer();
     localStorage.setItem('score', score);
     localStorage.setItem('exp', exp);
     localStorage.setItem('level', level);
     localStorage.setItem('rank', rank);
     localStorage.setItem('multiplier', multiplier);
   }, [score, exp, level, rank, multiplier]);
+  
 
   const handleStart = () => {
     setStarted(true);
@@ -53,6 +62,36 @@ export default function App() {
 
   const handleWalletConnect = () => {
     setWalletConnected(true);
+  };
+
+  const handleSaveToServer = () => {
+    fetch(`${API_URL}/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        wallet_id: userId,
+        telegram_id: userId,
+        score,
+        exp,
+        level,
+        rank,
+        multiplier
+      })
+    });
+  };
+  
+  const handleLoadFromServer = () => {
+    fetch(`${API_URL}/load?wallet_id=${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setScore(data.score);
+          setExp(data.exp);
+          setLevel(data.level);
+          setRank(data.rank);
+          setMultiplier(data.multiplier);
+        }
+      });
   };
 
   return (
